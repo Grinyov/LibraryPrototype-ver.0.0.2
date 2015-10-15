@@ -9,7 +9,7 @@
 
     <application>
         <resource-bundle>
-            <base-name>com.grinyov.web.nls.messages</base-name>
+            <base-name>com.grinyov.library.nls.messages</base-name>
             <var>msg</var>
         </resource-bundle>
     </application>
