@@ -20,7 +20,7 @@ public class Dao {
     public static Connection getConnection() {
         try {
             ic = new InitialContext();
-            ds = (DataSource) ic.lookup("java:comp/env/jdbc/Library");
+            ds = (DataSource) ic.lookup("jdbc/library");
             conn = ds.getConnection();
         } catch (SQLException ex) {
             Logger.getLogger(Dao.class.getName()).log(Level.SEVERE, null, ex);

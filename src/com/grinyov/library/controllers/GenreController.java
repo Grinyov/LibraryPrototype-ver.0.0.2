@@ -1,9 +1,5 @@
-package com.grinyov.library.beans;
+package com.grinyov.library.controllers;
 
-import com.grinyov.library.dao.Dao;
-
-import javax.faces.bean.ApplicationScoped;
-import javax.faces.bean.ManagedBean;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -12,21 +8,31 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.faces.bean.ApplicationScoped;
+import javax.faces.bean.ManagedBean;
+import com.grinyov.library.beans.Genre;
+import com.grinyov.library.dao.Dao;
 /**
- * Created by Grinyov Vitaliy on 15.10.15.
- *
- * Класс отвечающий за список жанров
+ * Created by Grinyov Vitaliy on 15.10.2015.
  */
-@ManagedBean
+
+@ManagedBean(eager = true)
 @ApplicationScoped
-public class Genres implements Serializable{
+public class GenreController implements Serializable {
 
-    private ArrayList<Genre> genreList = new ArrayList<Genre>();
+    private ArrayList<Genre> genreList;
 
-    private ArrayList<Genre> getGenres() {
+    public GenreController() {
+        fillGenresAll();
+    }
+
+    private void fillGenresAll() {
         Statement stmt = null;
         ResultSet rs = null;
         Connection conn = null;
+
+        genreList = new ArrayList<Genre>();
+
         try {
             conn = Dao.getConnection();
 
@@ -40,7 +46,7 @@ public class Genres implements Serializable{
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(Genres.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(GenreController.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
                 if (stmt != null) {
@@ -53,19 +59,14 @@ public class Genres implements Serializable{
                     conn.close();
                 }
             } catch (SQLException ex) {
-                Logger.getLogger(Genres.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(GenreController.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        return genreList;
     }
 
     public ArrayList<Genre> getGenreList() {
-        System.out.println("asdasd");
-        if (!genreList.isEmpty()) {
-            return genreList;
-        } else {
-            return getGenres();
-        }
+        return genreList;
     }
 }
+

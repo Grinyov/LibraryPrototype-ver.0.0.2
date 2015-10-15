@@ -10,6 +10,8 @@ import java.util.ResourceBundle;
 
 /**
  * Created by Grinyov Vitaliy on 15.10.15.
+ *
+ * Класс-валидатор, проверяющий корректность ввода
  */
 @FacesValidator("com.grinyov.library.validators.LoginValidator")
 public class LoginValidator implements Validator {
