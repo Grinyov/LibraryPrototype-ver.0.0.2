@@ -7,17 +7,17 @@ import java.io.Serializable;
  */
 public class Book implements Serializable {
 
-    private long id;
-    private String name;
-    private byte[] content;// pdf файла загружаем в это поле только момент просмотра
-    private int pageCount;
-    private String isbn;
-    private String genre;
-    private String author;
-    private int publishDate;
-    private String publisher;
-    private byte[] image;
-    private String descr;
+    private long id;        // уникальный номер книги
+    private String name;    // название
+    private byte[] content;// pdf файла загружаем в это поле только в нужный момент (для просмотра)
+    private int pageCount; // кол-во страниц
+    private String isbn;   // ISBN
+    private String genre;   // Жанр книги
+    private String author;  // автор
+    private int publishDate;// дата публикации
+    private String publisher;// издатель
+    private byte[] image;   // обложка
+    private String descr;   // краткое описание
 
     public long getId() {
         return id;
@@ -106,8 +106,4 @@ public class Book implements Serializable {
     public void setDescr(String descr) {
         this.descr = descr;
     }
-
-
-
 }
-

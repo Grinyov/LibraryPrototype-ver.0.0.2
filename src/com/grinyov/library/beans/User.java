@@ -16,6 +16,7 @@ import java.io.Serializable;
 public class User implements Serializable{
 
     private String username;
+    private String password;
 
     public User() {
     }
@@ -28,4 +29,11 @@ public class User implements Serializable{
         this.username = username;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }
