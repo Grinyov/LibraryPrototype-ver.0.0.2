@@ -5,12 +5,15 @@ import com.grinyov.library.controllers.SearchController;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 /**
  * Created by green on 15.10.2015.
  */
+@WebServlet(name = "ShowImage",
+        urlPatterns = {"/ShowImage"})
 public class ShowImage extends HttpServlet {
 
     /**
@@ -29,11 +32,11 @@ public class ShowImage extends HttpServlet {
         OutputStream out = response.getOutputStream();
         try {
             int id = Integer.valueOf(request.getParameter("id"));
-            SearchController searchController = (SearchController)request.getSession(false).getAttribute("searchController");
+            SearchController searchController = (SearchController) request.getSession(false).getAttribute("searchController");
             byte[] image = searchController.getImage(id);
             response.setContentLength(image.length);
             out.write(image);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
             out.close();
