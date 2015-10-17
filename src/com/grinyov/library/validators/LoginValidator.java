@@ -14,13 +14,13 @@ import java.util.ResourceBundle;
  *
  * Класс-валидатор, проверяющий корректность ввода
  */
-@FacesValidator("ru.javabegin.training.web.validators.LoginValidator")
+@FacesValidator("com.grinyov.library.validators.LoginValidator")
 public class LoginValidator implements Validator {
 
     @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
 
-        ResourceBundle bundle = ResourceBundle.getBundle("ru.javabegin.training.web.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+        ResourceBundle bundle = ResourceBundle.getBundle("com.grinyov.library.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
 
         try {
             String newValue = value.toString();

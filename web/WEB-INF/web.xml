@@ -15,16 +15,6 @@
         <url-pattern>*.xhtml</url-pattern>
     </servlet-mapping>
 
-    <servlet>
-        <servlet-name>ShowImage</servlet-name>
-        <servlet-class>com.grinyov.library.servlets.ShowImage</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>ShowImage</servlet-name>
-        <url-pattern>/ShowImage</url-pattern>
-    </servlet-mapping>
-
     <session-config>
         <session-timeout>
             30
@@ -40,5 +30,6 @@
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
+
 
 </web-app>
