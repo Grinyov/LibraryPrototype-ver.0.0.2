@@ -1,5 +1,8 @@
 package com.grinyov.library.controllers;
 
+import com.grinyov.library.beans.Genre;
+import com.grinyov.library.dao.Dao;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,10 +13,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
-import com.grinyov.library.beans.Genre;
-import com.grinyov.library.dao.Dao;
+
 /**
  * Created by Grinyov Vitaliy on 15.10.2015.
+ *
+ * Контроллер жанров
  */
 
 @ManagedBean(eager = true)
@@ -69,4 +73,3 @@ public class GenreController implements Serializable {
         return genreList;
     }
 }
-

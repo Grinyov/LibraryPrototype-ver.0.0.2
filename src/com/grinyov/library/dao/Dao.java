@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 
 /**
  * Created by Grinyov Vitaliy on 15.10.15.
+ *
+ * Класс, отвечающий за связь с базой данных
  */
 public class Dao {
 

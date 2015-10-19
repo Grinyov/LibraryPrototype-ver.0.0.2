@@ -47,7 +47,7 @@ public class LoginValidator implements Validator {
     }
 
     private ArrayList<String> getTestArray() {
-        ArrayList<String> list = new ArrayList<String>();// Р·Р°РіР»СѓС€РєР°, Р¶РµР»Р°С‚РµР»СЊРЅРѕ РґРµР»Р°С‚СЊ Р·Р°РїСЂРѕСЃ РІ Р±Р°Р·Сѓ РґР°РЅРЅС‹С… РґР»СЏ РїСЂРѕРІРµСЂРєРё СЃСѓС‰РµСЃС‚РІСѓСЋС‰РµРіРѕ РёРјРµРЅРё
+        ArrayList<String> list = new ArrayList<String>();// заглушка, желательно делать запрос в базу данных для проверки существующего имени
         list.add("username");
         list.add("login");
         return list;

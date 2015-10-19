@@ -10,8 +10,6 @@ import java.io.Serializable;
  * Класс, представляющий жанры нашей библиотеки
  */
 
-@ManagedBean
-@SessionScoped
 public class Genre implements Serializable {
 
     private String name;

@@ -1,6 +1,6 @@
 package com.grinyov.library.servlets;
 
-import com.grinyov.library.controllers.SearchController;
+import com.grinyov.library.controllers.BookListController;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 /**
  * Created by green on 15.10.2015.
+ *
+ * Сервлет отвечающий за просмотр
  */
 @WebServlet(name = "ShowImage",
         urlPatterns = {"/ShowImage"})
@@ -32,7 +34,7 @@ public class ShowImage extends HttpServlet {
         OutputStream out = response.getOutputStream();
         try {
             int id = Integer.valueOf(request.getParameter("id"));
-            SearchController searchController = (SearchController) request.getSession(false).getAttribute("searchController");
+            BookListController searchController = (BookListController) request.getSession(false).getAttribute("bookListController");
             byte[] image = searchController.getImage(id);
             response.setContentLength(image.length);
             out.write(image);

@@ -7,6 +7,8 @@ import java.io.Serializable;
  */
 public class Book implements Serializable {
 
+    private boolean edit;
+
     private long id;        // уникальный номер книги
     private String name;    // название
     private byte[] content;// pdf файла загружаем в это поле только в нужный момент (для просмотра)
@@ -106,4 +108,14 @@ public class Book implements Serializable {
     public void setDescr(String descr) {
         this.descr = descr;
     }
+
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
+
+
 }
