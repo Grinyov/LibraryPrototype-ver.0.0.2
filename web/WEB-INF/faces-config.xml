@@ -38,7 +38,7 @@
         </navigation-case>
     </navigation-rule>
     <navigation-rule>
-        <from-view-id>/pages/content.xhtml</from-view-id>
+        <from-view-id>/templates/content.xhtml</from-view-id>
         <navigation-case>
             <from-outcome>books</from-outcome>
             <to-view-id>/pages/books.xhtml</to-view-id>

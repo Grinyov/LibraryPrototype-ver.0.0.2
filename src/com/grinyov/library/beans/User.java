@@ -2,23 +2,17 @@ package com.grinyov.library.beans;
 
 import com.grinyov.library.controllers.BookListController;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
-/**
- * Created by Grinyov Vitaliy on 14.10.15.
- *
- * Класс, отвечающий за пользователей системы
- *
- */
 
 @ManagedBean
 @SessionScoped
@@ -45,25 +39,16 @@ public class User implements Serializable {
     public String getPassword() {
         return password;
     }
-
-
+    
+    
     public String login() {
         try {
-
-            try {
-                Thread.sleep(1000);// имитация загрузки процесса
-            } catch (InterruptedException ex) {
-                Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-//            ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).logout();
-//            FacesContext.getCurrentInstance().getExternalContext().invalidateSession();
 
             ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).login(username, password);
 
             return "books";
         } catch (ServletException ex) {
-            ResourceBundle bundle = ResourceBundle.getBundle("ru.javabegin.training.web.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+            ResourceBundle bundle = ResourceBundle.getBundle("com.grinyov.library.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
             FacesContext context = FacesContext.getCurrentInstance();
             FacesMessage message = new FacesMessage(bundle.getString("login_error"));
@@ -92,5 +77,5 @@ public class User implements Serializable {
 
         return result;
     }
-
+    
 }

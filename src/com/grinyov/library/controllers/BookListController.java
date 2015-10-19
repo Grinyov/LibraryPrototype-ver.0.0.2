@@ -1,356 +1,124 @@
 package com.grinyov.library.controllers;
 
-import com.grinyov.library.enums.SearchType;
+import com.grinyov.library.beans.Pager;
 import com.grinyov.library.dao.Dao;
-import com.grinyov.library.beans.Book;
+import com.grinyov.library.entity.Book;
+import com.grinyov.library.enums.SearchType;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 
-/**
- * Created by green on 19.10.2015.
- *
- * Главный контроллер, отвечающий за взаимодействие с книгами
- *
- */
+
 @ManagedBean(eager = true)
 @SessionScoped
 public class BookListController implements Serializable {
 
-    private ArrayList<Book> currentBookList; // текущий список книг для отображения
-    private ArrayList<Integer> pageNumbers = new ArrayList<Integer>(); // кол-во страниц для постраничности
-    // критерии поиска
-    private char selectedLetter; // выбранная буква алфавита, по умолчанию не выбрана ни одна буква
-    private SearchType selectedSearchType = SearchType.TITLE;// хранит выбранный тип поиска, по-умолчанию - по названию
-    private int selectedGenreId; // выбранный жанр
-    private String currentSearchString; // хранит поисковую строку
-    private String currentSqlNoLimit;// последний выполнный sql без добавления limit
-    // для постраничности----
-    private boolean pageSelected;
-    private int booksCountOnPegh = 2;// кол-во отображаемых книг на 1 странице
-    private long selectedPageNumber = 1; // выбранный номер страницы в постраничной навигации
-    private long totalBooksCount; // общее кол-во книг (не на текущей странице, а всего), нажно для постраничности
+    private Long selectedAuthorId;// С‚РµРєСѓС‰РёР№ Р°РІС‚РѕСЂ РєРЅРёРіРё РёР· СЃРїРёСЃРєР° РїСЂРё СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРё РєРЅРёРіРё
+    // РєСЂРёС‚РµСЂРёРё РїРѕРёСЃРєР°
+    private char selectedLetter; // РІС‹Р±СЂР°РЅРЅР°СЏ Р±СѓРєРІР° Р°Р»С„Р°РІРёС‚Р°, РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅРµ РІС‹Р±СЂР°РЅР° РЅРё РѕРґРЅР° Р±СѓРєРІР°
+    private SearchType selectedSearchType = SearchType.TITLE;// С…СЂР°РЅРёС‚ РІС‹Р±СЂР°РЅРЅС‹Р№ С‚РёРї РїРѕРёСЃРєР°, РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ - РїРѕ РЅР°Р·РІР°РЅРёСЋ
+    private long selectedGenreId; // РІС‹Р±СЂР°РЅРЅС‹Р№ Р¶Р°РЅСЂ
+    private String currentSearchString; // С…СЂР°РЅРёС‚ РїРѕРёСЃРєРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ
+    private Pager<Book> pager = new Pager<Book>();
+ 
     //-------
-    private boolean editModeView;// отображение режима редактирования
+    private boolean editModeView;// РѕС‚РѕР±СЂР°Р¶РµРЅРёРµ СЂРµР¶РёРјР° СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
 
     public BookListController() {
         fillBooksAll();
     }
 
-    private void submitValues(Character selectedLetter, long selectedPageNumber, int selectedGenreId, boolean requestFromPager) {
+    private void submitValues(Character selectedLetter, int selectedPageNumber, long selectedGenreId) {
         this.selectedLetter = selectedLetter;
-        this.selectedPageNumber = selectedPageNumber;
+        pager.setSelectedPageNumber(selectedPageNumber);
         this.selectedGenreId = selectedGenreId;
-        this.pageSelected = requestFromPager;
-
     }
 
-    //<editor-fold defaultstate="collapsed" desc="запросы в базу">
-    private void fillBooksBySQL(String sql) {
-
-        StringBuilder sqlBuilder = new StringBuilder(sql);
-
-        currentSqlNoLimit = sql;
-
-        Statement stmt = null;
-        ResultSet rs = null;
-        Connection conn = null;
-
-        try {
-            conn = Dao.getConnection();
-            stmt = conn.createStatement();
-
-            if (!pageSelected) {
-
-                rs = stmt.executeQuery(sqlBuilder.toString());
-                rs.last();
-
-                totalBooksCount = rs.getRow();
-                fillPageNumbers(totalBooksCount, booksCountOnPegh);
-
-            }
-
-            if (totalBooksCount > booksCountOnPegh) {
-                sqlBuilder.append(" limit ").append(selectedPageNumber * booksCountOnPegh - booksCountOnPegh).append(",").append(booksCountOnPegh);
-            }
-
-            rs = stmt.executeQuery(sqlBuilder.toString());
-
-            currentBookList = new ArrayList<Book>();
-
-            while (rs.next()) {
-                Book book = new Book();
-                book.setId(rs.getLong("id"));
-                book.setName(rs.getString("name"));
-                book.setGenre(rs.getString("genre"));
-                book.setIsbn(rs.getString("isbn"));
-                book.setAuthor(rs.getString("author"));
-                book.setPageCount(rs.getInt("page_count"));
-                book.setPublishDate(rs.getInt("publish_year"));
-                book.setPublisher(rs.getString("publisher"));
-                //              book.setImage(rs.getBytes("image"));
-                //              book.setContent(rs.getBytes("content"));
-                book.setDescr(rs.getString("descr"));
-                currentBookList.add(book);
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-
+    //<editor-fold defaultstate="collapsed" desc="Р·Р°РїСЂРѕСЃС‹ РІ Р±Р°Р·Сѓ">
     private void fillBooksAll() {
-        fillBooksBySQL("select b.id,b.name,b.isbn,b.page_count,b.publish_year, p.name as publisher, b.descr, "
-                + "a.fio as author, g.name as genre, b.image from book b inner join author a on b.author_id=a.id "
-                + "inner join genre g on b.genre_id=g.id inner join publisher p on b.publisher_id=p.id order by b.name");
+
+        Dao.getInstance().getAllBooks(pager);
+
+
     }
 
     public String fillBooksByGenre() {
 
-        imitateLoading();
+        row = -1;
 
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
 
-        selectedGenreId = Integer.valueOf(params.get("genre_id"));
+        selectedGenreId = Long.valueOf(params.get("genre_id"));
 
-        submitValues(' ', 1, selectedGenreId, false);
-
-        fillBooksBySQL("select b.id,b.name,b.isbn,b.page_count,b.publish_year, p.name as publisher, a.fio as author, g.name as genre, b.descr, b.image from book b "
-                + "inner join author a on b.author_id=a.id "
-                + "inner join genre g on b.genre_id=g.id "
-                + "inner join publisher p on b.publisher_id=p.id "
-                + "where genre_id=" + selectedGenreId + " order by b.name ");
-
-
+        submitValues(' ', 1, selectedGenreId);
+        Dao.getInstance().getBooksByGenre(selectedGenreId, pager);
 
         return "books";
     }
 
     public String fillBooksByLetter() {
 
-        imitateLoading();
+        row = -1;
 
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         selectedLetter = params.get("letter").charAt(0);
 
-        submitValues(selectedLetter, 1, -1, false);
+        submitValues(selectedLetter, 1, -1);
 
 
-        fillBooksBySQL("select b.id,b.name,b.isbn,b.page_count,b.publish_year, p.name as publisher, a.fio as author, g.name as genre, b.descr, b.image from book b "
-                + "inner join author a on b.author_id=a.id "
-                + "inner join genre g on b.genre_id=g.id "
-                + "inner join publisher p on b.publisher_id=p.id "
-                + "where substr(b.name,1,1)='" + selectedLetter + "' order by b.name ");
+        Dao.getInstance().getBooksByLetter(selectedLetter, pager);
 
         return "books";
     }
 
     public String fillBooksBySearch() {
 
-        imitateLoading();
+        row = -1;
 
-        submitValues(' ', 1, -1, false);
+        submitValues(' ', 1, -1);
 
         if (currentSearchString.trim().length() == 0) {
             fillBooksAll();
             return "books";
         }
 
-        StringBuilder sql = new StringBuilder("select b.descr, b.id,b.name,b.isbn,b.page_count,b.publish_year, p.name as publisher, a.fio as author, g.name as genre, b.image from book b "
-                + "inner join author a on b.author_id=a.id "
-                + "inner join genre g on b.genre_id=g.id "
-                + "inner join publisher p on b.publisher_id=p.id ");
-
         if (selectedSearchType == SearchType.AUTHOR) {
-            sql.append("where lower(a.fio) like '%" + currentSearchString.toLowerCase() + "%' order by b.name ");
-
+            Dao.getInstance().getBooksByAuthor(currentSearchString, pager);
         } else if (selectedSearchType == SearchType.TITLE) {
-            sql.append("where lower(b.name) like '%" + currentSearchString.toLowerCase() + "%' order by b.name ");
+            Dao.getInstance().getBooksByName(currentSearchString, pager);
         }
-
-
-
-        fillBooksBySQL(sql.toString());
 
 
         return "books";
     }
 
-    public byte[] getContent(int id) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Connection conn = null;
-
-
-        byte[] content = null;
-        try {
-            conn = Dao.getConnection();
-            stmt = conn.createStatement();
-
-            rs = stmt.executeQuery("select content from book where id=" + id);
-            while (rs.next()) {
-                content = rs.getBytes("content");
-            }
-        } catch (SQLException ex) {
-            Logger.getLogger(Book.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(Book.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        return content;
-
-    }
-
-    public byte[] getImage(int id) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        Connection conn = null;
-
-        byte[] image = null;
-
-        try {
-            conn = Dao.getConnection();
-            stmt = conn.createStatement();
-
-            rs = stmt.executeQuery("select image from book where id=" + id);
-            while (rs.next()) {
-                image = rs.getBytes("image");
-            }
-
-        } catch (SQLException ex) {
-            Logger.getLogger(Book.class
-                    .getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(Book.class
-                        .getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        return image;
-    }
-
-    public String updateBooks() {
-        imitateLoading();
-
-        PreparedStatement prepStmt = null;
-        ResultSet rs = null;
-        Connection conn = null;
-
-        try {
-            conn = Dao.getConnection();
-            prepStmt = conn.prepareStatement("update book set name=?, isbn=?, page_count=?, publish_year=?, descr=? where id=?");
-
-
-            for (Book book : currentBookList) {
-                if (!book.isEdit()) {
-                    continue;
-                }
-                prepStmt.setString(1, book.getName());
-                prepStmt.setString(2, book.getIsbn());
-                //                prepStmt.setString(3, book.getAuthor());
-                prepStmt.setInt(3, book.getPageCount());
-                prepStmt.setInt(4, book.getPublishDate());
-                //                prepStmt.setString(6, book.getPublisher());
-                prepStmt.setString(5, book.getDescr());
-                prepStmt.setLong(6, book.getId());
-                prepStmt.addBatch();
-            }
-
-
-            prepStmt.executeBatch();
-
-
-        } catch (SQLException ex) {
-            Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (prepStmt != null) {
-                    prepStmt.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-                if (conn != null) {
-                    conn.close();
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+    public void updateBooks() {
 
         cancelEditMode();
-
-        return "books";
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="режим редактирования">
+    //<editor-fold defaultstate="collapsed" desc="СЂРµР¶РёРј СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ">
     public void showEdit() {
+        row=-1;
         editModeView = true;
     }
 
     public void cancelEditMode() {
         editModeView = false;
-        for (Book book : currentBookList) {
+        for (Book book : pager.getList()) {
             book.setEdit(false);
         }
     }
     //</editor-fold>
 
     public Character[] getRussianLetters() {
-        Character[] letters = new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я',};
+        Character[] letters = new Character[]{'Рђ', 'Р‘', 'Р’', 'Р“', 'Р”', 'Р•', 'РЃ', 'Р–', 'Р—', 'Р', 'Р™', 'Рљ', 'Р›', 'Рњ', 'Рќ', 'Рћ', 'Рџ', 'Р ', 'РЎ', 'Рў', 'РЈ', 'Р¤', 'РҐ', 'Р¦', 'Р§', 'РЁ', 'Р©', 'РЄ', 'Р«', 'Р¬', 'Р­', 'Р®', 'РЇ',};
         return letters;
     }
 
@@ -362,55 +130,27 @@ public class BookListController implements Serializable {
         selectedSearchType = (SearchType) e.getNewValue();
     }
 
-    //<editor-fold defaultstate="collapsed" desc="постраничность">
+    //<editor-fold defaultstate="collapsed" desc="РїРѕСЃС‚СЂР°РЅРёС‡РЅРѕСЃС‚СЊ">
     public void changeBooksCountOnPage(ValueChangeEvent e) {
-        imitateLoading();
+        row = -1;
         cancelEditMode();
-        pageSelected = false;
-        booksCountOnPegh = Integer.valueOf(e.getNewValue().toString()).intValue();
-        selectedPageNumber = 1;
-        fillBooksBySQL(currentSqlNoLimit);
+        pager.setBooksCountOnPage(Integer.valueOf(e.getNewValue().toString()).intValue());
+        pager.setSelectedPageNumber(1);
+        Dao.getInstance().runCurrentCriteria();
     }
 
     public void selectPage() {
+        row = -1;
         cancelEditMode();
-        imitateLoading();
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        selectedPageNumber = Integer.valueOf(params.get("page_number"));
-        pageSelected = true;
-        fillBooksBySQL(currentSqlNoLimit);
-
+        pager.setSelectedPageNumber(Integer.valueOf(params.get("page_number")));
+        Dao.getInstance().runCurrentCriteria();
     }
 
-    private void fillPageNumbers(long totalBooksCount, int booksCountOnPage) {
-
-        int pageCount = 0;
-
-        if (totalBooksCount % booksCountOnPage == 0) {
-            pageCount = booksCountOnPage > 0 ? (int) (totalBooksCount / booksCountOnPage) : 0;
-        } else {
-            pageCount = booksCountOnPage > 0 ? (int) (totalBooksCount / booksCountOnPage) + 1 : 0;
-        }
-
-        pageNumbers.clear();
-        for (int i = 1; i <= pageCount; i++) {
-            pageNumbers.add(i);
-        }
-
-    }
     //</editor-fold>
-
-    //<editor-fold defaultstate="collapsed" desc="гетеры сетеры">
+    //<editor-fold defaultstate="collapsed" desc="РіРµС‚РµСЂС‹ СЃРµС‚РµСЂС‹">
     public boolean isEditMode() {
         return editModeView;
-    }
-
-    public ArrayList<Integer> getPageNumbers() {
-        return pageNumbers;
-    }
-
-    public void setPageNumbers(ArrayList<Integer> pageNumbers) {
-        this.pageNumbers = pageNumbers;
     }
 
     public String getSearchString() {
@@ -428,20 +168,14 @@ public class BookListController implements Serializable {
     public void setSearchType(SearchType searchType) {
         this.selectedSearchType = searchType;
     }
+    private transient int row = -1;
 
-    public ArrayList<Book> getCurrentBookList() {
-        return currentBookList;
+    public int getRow() {
+        row += 1;
+        return row;
     }
 
-    public void setTotalBooksCount(long booksCount) {
-        this.totalBooksCount = booksCount;
-    }
-
-    public long getTotalBooksCount() {
-        return totalBooksCount;
-    }
-
-    public int getSelectedGenreId() {
+    public long getSelectedGenreId() {
         return selectedGenreId;
     }
 
@@ -457,28 +191,16 @@ public class BookListController implements Serializable {
         this.selectedLetter = selectedLetter;
     }
 
-    public int getBooksOnPage() {
-        return booksCountOnPegh;
+    public Long getSelectedAuthorId() {
+        return selectedAuthorId;
     }
 
-    public void setBooksOnPage(int booksOnPage) {
-        this.booksCountOnPegh = booksOnPage;
+    public void setSelectedAuthorId(Long selectedAuthorId) {
+        this.selectedAuthorId = selectedAuthorId;
     }
 
-    public void setSelectedPageNumber(long selectedPageNumber) {
-        this.selectedPageNumber = selectedPageNumber;
-    }
-
-    public long getSelectedPageNumber() {
-        return selectedPageNumber;
+    public Pager getPager() {
+        return pager;
     }
     //</editor-fold>
-
-    private void imitateLoading() {
-        try {
-            Thread.sleep(1000);// имитация загрузки процесса
-        } catch (InterruptedException ex) {
-            Logger.getLogger(BookListController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 }
