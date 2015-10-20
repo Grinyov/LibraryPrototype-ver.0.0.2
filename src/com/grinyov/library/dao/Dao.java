@@ -21,7 +21,9 @@ import org.hibernate.criterion.Restrictions;
 /**
  * Created by Grinyov Vitaliy on 15.10.15.
  *
- * Класс, отвечающий за связь с базой данных
+ * Класс, отвечающий за связь с базой данных и выполнение запросов к ней
+ *
+ * Запросы строятся через критерии. Транзанкции открываются и закрываются через фильтр в классе HibernateSession
  */
 public class Dao {
 
