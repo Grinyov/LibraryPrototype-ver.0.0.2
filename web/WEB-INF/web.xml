@@ -17,6 +17,9 @@
         <session-timeout>
             30
         </session-timeout>
+        <cookie-config>
+            <name>SESSIONID</name>
+        </cookie-config>
     </session-config>
     <welcome-file-list>
         <welcome-file>index.xhtml</welcome-file>
@@ -60,4 +63,10 @@
         <res-auth>Container</res-auth>
         <res-sharing-scope>Shareable</res-sharing-scope>
     </resource-ref>
+    
+    <context-param>
+        <param-name>primefaces.THEME</param-name>
+        <param-value>library</param-value>
+    </context-param>
+
 </web-app>

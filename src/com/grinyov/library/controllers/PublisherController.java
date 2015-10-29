@@ -1,8 +1,8 @@
 package com.grinyov.library.controllers;
 
-import com.grinyov.library.dao.Dao;
-import com.grinyov.library.entity.Genre;
 import com.grinyov.library.comparators.ListComparator;
+import com.grinyov.library.dao.Dao;
+import com.grinyov.library.entity.Publisher;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,21 +20,22 @@ import javax.faces.model.SelectItem;
 
 @ManagedBean(eager = false)
 @ApplicationScoped
-public class GenreController implements Serializable, Converter {
+public class PublisherController implements Serializable, Converter {
 
     private List<SelectItem> selectItems = new ArrayList<SelectItem>();
-    private Map<Long, Genre> map;
-    private List<Genre> list;
+    private Map<Long, Publisher> map;
+    private List<Publisher> list;
 
-    public GenreController() {
+    public PublisherController() {
 
-        map = new HashMap<Long, Genre>();
-        list = Dao.getInstance().getAllGenres();
+        map = new HashMap<Long, Publisher>();
+        list = Dao.getInstance().getAllPublishers();
+        
         Collections.sort(list, ListComparator.getInstance());
 
-        for (Genre genre : list) {
-            map.put(genre.getId(), genre);
-            selectItems.add(new SelectItem(genre, genre.getName()));
+        for (Publisher publisher : list) {
+            map.put(publisher.getId(), publisher);
+            selectItems.add(new SelectItem(publisher, publisher.getName()));
         }
 
     }
@@ -43,7 +44,7 @@ public class GenreController implements Serializable, Converter {
         return selectItems;
     }
 
-    public List<Genre> getGenreList() {
+    public List<Publisher> getPublisherList() {
         return list;
     }
 
@@ -54,8 +55,6 @@ public class GenreController implements Serializable, Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Genre)value).getId().toString();
+        return ((Publisher)value).getId().toString();
     }
-    
-    
 }

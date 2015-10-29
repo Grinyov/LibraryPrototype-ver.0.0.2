@@ -2,6 +2,7 @@ package com.grinyov.library.servlets;
 
 import com.grinyov.library.controllers.BookListController;
 import com.grinyov.library.entity.Book;
+//import com.grinyov.library.servlets;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  * Сервлет отвечающий за просмотр
  */
 @WebServlet(name = "ShowImage",
-        urlPatterns = {"/ShowImage"})
+urlPatterns = {"/ShowImage"})
 public class ShowImage extends HttpServlet {
 
 //    private static Map<Long, Byte[]> imageMap = new HashMap();

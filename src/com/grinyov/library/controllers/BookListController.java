@@ -4,119 +4,132 @@ import com.grinyov.library.beans.Pager;
 import com.grinyov.library.dao.Dao;
 import com.grinyov.library.entity.Book;
 import com.grinyov.library.enums.SearchType;
+import com.grinyov.library.models.BookListDataModel;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import org.primefaces.component.datatable.DataTable;
+import org.primefaces.context.RequestContext;
+import org.primefaces.model.LazyDataModel;
 
 
 @ManagedBean(eager = true)
 @SessionScoped
 public class BookListController implements Serializable {
 
+    private DataTable dataTable;
+    private Book selectedBook;
+    private Dao dataHelper = dataHelper = Dao.getInstance();
+    private LazyDataModel<Book> bookListModel;
     private Long selectedAuthorId;// текущий автор книги из списка при редактировании книги
     // критерии поиска
     private char selectedLetter; // выбранная буква алфавита, по умолчанию не выбрана ни одна буква
     private SearchType selectedSearchType = SearchType.TITLE;// хранит выбранный тип поиска, по-умолчанию - по названию
     private long selectedGenreId; // выбранный жанр
     private String currentSearchString; // хранит поисковую строку
-    private Pager<Book> pager = new Pager<Book>();
- 
+    private Pager pager = Pager.getInstance();
     //-------
     private boolean editModeView;// отображение режима редактирования
 
     public BookListController() {
-        fillBooksAll();
+        bookListModel = new BookListDataModel();
     }
 
-    private void submitValues(Character selectedLetter, int selectedPageNumber, long selectedGenreId) {
+    private void submitValues(Character selectedLetter, long selectedGenreId) {
         this.selectedLetter = selectedLetter;
-        pager.setSelectedPageNumber(selectedPageNumber);
         this.selectedGenreId = selectedGenreId;
+        dataTable.setFirst(0);
     }
 
     //<editor-fold defaultstate="collapsed" desc="запросы в базу">
     private void fillBooksAll() {
-
-        Dao.getInstance().getAllBooks(pager);
-
-
+        dataHelper.getAllBooks();
     }
 
-    public String fillBooksByGenre() {
-
-        row = -1;
-
+    public void fillBooksByGenre() {
+        
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-
         selectedGenreId = Long.valueOf(params.get("genre_id"));
-
-        submitValues(' ', 1, selectedGenreId);
-        Dao.getInstance().getBooksByGenre(selectedGenreId, pager);
-
-        return "books";
+        submitValues(' ', selectedGenreId);
+        dataHelper.getBooksByGenre(selectedGenreId);       
+        
     }
 
-    public String fillBooksByLetter() {
 
-        row = -1;
-
+    public void fillBooksByLetter() {
+        
         Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
         selectedLetter = params.get("letter").charAt(0);
-
-        submitValues(selectedLetter, 1, -1);
-
-
-        Dao.getInstance().getBooksByLetter(selectedLetter, pager);
-
-        return "books";
+        submitValues(selectedLetter, -1);
+        dataHelper.getBooksByLetter(selectedLetter);
+        
     }
 
-    public String fillBooksBySearch() {
+    public void fillBooksBySearch() {
 
-        row = -1;
-
-        submitValues(' ', 1, -1);
+        submitValues(' ', -1);
 
         if (currentSearchString.trim().length() == 0) {
             fillBooksAll();
-            return "books";
+
         }
 
         if (selectedSearchType == SearchType.AUTHOR) {
-            Dao.getInstance().getBooksByAuthor(currentSearchString, pager);
+            dataHelper.getBooksByAuthor(currentSearchString);
         } else if (selectedSearchType == SearchType.TITLE) {
-            Dao.getInstance().getBooksByName(currentSearchString, pager);
+            dataHelper.getBooksByName(currentSearchString);
         }
 
-
-        return "books";
     }
 
-    public void updateBooks() {
+    public void updateBook() {
 
+        dataHelper.updateBook(selectedBook);
         cancelEditMode();
+        dataHelper.populateList();
+
+        RequestContext.getCurrentInstance().execute("dlgEditBook.hide()");
+
+        ResourceBundle bundle = ResourceBundle.getBundle("com.grinyov.library.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("updated")));
+
+        dataTable.setFirst(calcSelectedPage());
+
     }
+
+    public void deleteBook() {
+        dataHelper.deleteBook(selectedBook);
+        dataHelper.populateList();
+
+//        RequestContext.getCurrentInstance().execute("dlgDeleteBook.hide()");
+        ResourceBundle bundle = ResourceBundle.getBundle("com.grinyov.library.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
+        FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(bundle.getString("deleted")));
+
+        dataTable.setFirst(calcSelectedPage());
+
+    }
+
     //</editor-fold>
-
     //<editor-fold defaultstate="collapsed" desc="режим редактирования">
-    public void showEdit() {
-        row=-1;
-        editModeView = true;
-    }
-
     public void cancelEditMode() {
         editModeView = false;
-        for (Book book : pager.getList()) {
-            book.setEdit(false);
-        }
-    }
-    //</editor-fold>
+        RequestContext.getCurrentInstance().execute("dlgEditBook.hide()");
 
+    }
+
+    public void switchEditMode() {
+        editModeView = true;
+        RequestContext.getCurrentInstance().execute("dlgEditBook.show()");
+
+    }
+
+    //</editor-fold>
     public Character[] getRussianLetters() {
         Character[] letters = new Character[]{'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я',};
         return letters;
@@ -129,25 +142,24 @@ public class BookListController implements Serializable {
     public void searchTypeChanged(ValueChangeEvent e) {
         selectedSearchType = (SearchType) e.getNewValue();
     }
-
-    //<editor-fold defaultstate="collapsed" desc="постраничность">
-    public void changeBooksCountOnPage(ValueChangeEvent e) {
-        row = -1;
-        cancelEditMode();
-        pager.setBooksCountOnPage(Integer.valueOf(e.getNewValue().toString()).intValue());
-        pager.setSelectedPageNumber(1);
-        Dao.getInstance().runCurrentCriteria();
+    
+     private int calcSelectedPage() {
+        int page = dataTable.getPage();// текущий номер страницы (индексация с нуля)
+        
+        int leftBound = pager.getTo()*(page-1);
+        int rightBound = pager.getTo()*page;
+        
+        boolean goPrevPage = pager.getTotalBooksCount()>leftBound & pager.getTotalBooksCount() <= rightBound;
+                
+                
+        if (goPrevPage)        
+        {
+            page--;
+        }       
+        
+        return (page>0)?page*pager.getTo():0;
     }
 
-    public void selectPage() {
-        row = -1;
-        cancelEditMode();
-        Map<String, String> params = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
-        pager.setSelectedPageNumber(Integer.valueOf(params.get("page_number")));
-        Dao.getInstance().runCurrentCriteria();
-    }
-
-    //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="гетеры сетеры">
     public boolean isEditMode() {
         return editModeView;
@@ -167,12 +179,6 @@ public class BookListController implements Serializable {
 
     public void setSearchType(SearchType searchType) {
         this.selectedSearchType = searchType;
-    }
-    private transient int row = -1;
-
-    public int getRow() {
-        row += 1;
-        return row;
     }
 
     public long getSelectedGenreId() {
@@ -202,5 +208,26 @@ public class BookListController implements Serializable {
     public Pager getPager() {
         return pager;
     }
+
+    public LazyDataModel<Book> getBookListModel() {
+        return bookListModel;
+    }
+
+    public void setSelectedBook(Book selectedBook) {
+        this.selectedBook = selectedBook;
+    }
+
+    public Book getSelectedBook() {
+        return selectedBook;
+    }
+
+    public DataTable getDataTable() {
+        return dataTable;
+    }
+
+    public void setDataTable(DataTable dataTable) {
+        this.dataTable = dataTable;
+    }
     //</editor-fold>
+
 }

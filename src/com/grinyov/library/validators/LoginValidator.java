@@ -1,13 +1,13 @@
 package com.grinyov.library.validators;
 
+import java.util.ArrayList;
+import java.util.ResourceBundle;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
 
 /**
  * Created by Grinyov Vitaliy on 15.10.15.
@@ -52,5 +52,5 @@ public class LoginValidator implements Validator {
         list.add("login");
         return list;
     }
-
+    
 }

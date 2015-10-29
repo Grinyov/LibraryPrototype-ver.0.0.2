@@ -2,6 +2,7 @@ package com.grinyov.library.beans;
 
 import java.io.Serializable;
 import java.util.Locale;
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
@@ -9,7 +10,7 @@ import javax.faces.context.FacesContext;
 /**
  * Created by green on 19.10.2015.
  *
- * Устанавливает и меняет локаль
+ * РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Рё РјРµРЅСЏРµС‚ Р»РѕРєР°Р»СЊ
  */
 @ManagedBean(eager=true)
 @SessionScoped

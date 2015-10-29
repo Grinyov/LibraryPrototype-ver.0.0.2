@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Created by green on 17.10.2015.
  *
- * Сервлет, отвечающий за просмотр pdf
+ * РЎРµСЂРІР»РµС‚, РѕС‚РІРµС‡Р°СЋС‰РёР№ Р·Р° РїСЂРѕСЃРјРѕС‚СЂ pdf
  *
  */
 @WebServlet(name = "PdfContent",

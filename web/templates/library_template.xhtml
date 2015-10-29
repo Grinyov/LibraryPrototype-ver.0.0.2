@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core">
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
 
     <f:view locale="#{localeChanger.currentLocale}">  
         <h:head>
@@ -14,10 +15,20 @@
         <h:body>
 
 
+            <p:ajaxStatus id="ajaxStatusPanel">  
+                <f:facet name="start">      
+                    <div id="loading_wrapper">
+                        <p>#{msg.loading}...</p>
+                    </div>
+                </f:facet>  
 
-            <div id="loading_wrapper">
-                <p>#{msg.loading}...</p>
-            </div>
+                <f:facet name="complete">  
+                    <h:outputText value="" />  
+                </f:facet>  
+            </p:ajaxStatus>  
+
+
+
 
             <div class="container">
 
@@ -38,10 +49,7 @@
 
                         <p><strong><ui:insert name="books_count"/></strong></p>
 
-                        <div class="pager">
-                            <h:panelGroup id="pages1" layout="block"> <ui:insert name="paginator"/> </h:panelGroup>
 
-                        </div>
 
                         <div class="content_books">
                             <ui:insert name="content">
@@ -49,11 +57,7 @@
                             </ui:insert>    
                         </div>
 
-                        <div class="pager">
 
-                            <h:panelGroup id="pages2" layout="block"> <ui:insert name="paginator"/> </h:panelGroup>
-
-                        </div>
 
                     </div>
 

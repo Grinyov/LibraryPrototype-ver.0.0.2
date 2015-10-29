@@ -1,7 +1,5 @@
 package com.grinyov.library.beans;
 
-import com.grinyov.library.controllers.BookListController;
-
 import java.io.Serializable;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -11,7 +9,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequest;;
 
 
 @ManagedBean
@@ -39,12 +37,26 @@ public class User implements Serializable {
     public String getPassword() {
         return password;
     }
-    
-    
+
     public String login() {
+        
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        
         try {
 
-            ((HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest()).login(username, password);
+            try {
+                Thread.sleep(2000);
+            } catch (Exception e) {
+            }
+
+            
+
+            if (request.getUserPrincipal()==null || (request.getUserPrincipal()!=null && !request.getUserPrincipal().getName().equals(username))) {
+                request.logout();
+                request.login(username, password);
+            }
+
+
 
             return "books";
         } catch (ServletException ex) {
@@ -53,8 +65,7 @@ public class User implements Serializable {
             FacesContext context = FacesContext.getCurrentInstance();
             FacesMessage message = new FacesMessage(bundle.getString("login_error"));
             message.setSeverity(FacesMessage.SEVERITY_ERROR);
-            context.addMessage("login_form", message);
-
+            context.addMessage("login_form", message);            
         }
 
         return "index";
@@ -77,5 +88,4 @@ public class User implements Serializable {
 
         return result;
     }
-    
 }

@@ -31,8 +31,7 @@ import org.hibernate.SessionFactory;
 @WebFilter(filterName = "HibernateSession",
 urlPatterns = {"/pages/*", "/PdfContent"})
 public class HibernateSession implements Filter {
-
-    private SessionFactory sessionFactory;
+private SessionFactory sessionFactory;
     private static final boolean debug = false;
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
@@ -139,7 +138,7 @@ public class HibernateSession implements Filter {
             throws IOException, ServletException {
 
 
-        HibernateSession.RequestWrapper wrappedRequest = new HibernateSession.RequestWrapper((HttpServletRequest) request);
+        HibernateSession.RequestWrapper wrappedRequest = new 			 HibernateSession.RequestWrapper((HttpServletRequest) request);
         HibernateSession.ResponseWrapper wrappedResponse = new HibernateSession.ResponseWrapper((HttpServletResponse) response);
 
 
@@ -169,10 +168,9 @@ public class HibernateSession implements Filter {
 
             doAfterProcessing(wrappedRequest, wrappedResponse);
 
-//            if (!path.startsWith(ResourceHandler.RESOURCE_IDENTIFIER)) {
             sessionFactory.getCurrentSession().getTransaction().commit();
+            sessionFactory.getCurrentSession().close();
             System.out.println("close session for " + wrappedRequest.getRequestURI());
-//            }
 
 
 

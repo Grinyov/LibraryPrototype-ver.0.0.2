@@ -2,9 +2,11 @@ package com.grinyov.library.controllers;
 
 import com.grinyov.library.dao.Dao;
 import com.grinyov.library.entity.Author;
+import com.grinyov.library.comparators.ListComparator;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,15 +23,23 @@ import javax.faces.model.SelectItem;
 public class AuthorController implements Serializable, Converter {
 
     private List<SelectItem> selectItems = new ArrayList<SelectItem>();;
-    private Map<Long,Author> authorMap;
+    private Map<Long,Author> map;
+    private List<Author> list;
+
 
     public AuthorController() {
-        authorMap = new HashMap<Long, Author>();
+        map = new HashMap<Long, Author>();
+        list = Dao.getInstance().getAllAuthors();
+        Collections.sort(list, ListComparator.getInstance());
         
-        for (Author author : Dao.getInstance().getAllAuthors()) {
-            authorMap.put(author.getId(), author);
+        for (Author author : list) {
+            map.put(author.getId(), author);
             selectItems.add(new SelectItem(author, author.getFio()));
         }
+    }
+    
+    public List<Author> getAuthorList(){
+        return list;
     }
 
     public List<SelectItem> getSelectItems() {
@@ -38,7 +48,7 @@ public class AuthorController implements Serializable, Converter {
 
     @Override
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
-        return authorMap.get(Long.valueOf(value));
+        return map.get(Long.valueOf(value));
     }
 
     @Override
