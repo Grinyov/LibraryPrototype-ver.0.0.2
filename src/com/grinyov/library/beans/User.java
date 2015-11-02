@@ -9,7 +9,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;;
+import javax.servlet.http.HttpServletRequest;
 
 
 @ManagedBean
@@ -40,32 +40,32 @@ public class User implements Serializable {
 
     public String login() {
         
+        try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+        }
+
+
+
         HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        
+
         try {
 
-            try {
-                Thread.sleep(2000);
-            } catch (Exception e) {
-            }
 
-            
-
-            if (request.getUserPrincipal()==null || (request.getUserPrincipal()!=null && !request.getUserPrincipal().getName().equals(username))) {
+            if (request.getUserPrincipal() == null || (request.getUserPrincipal() != null && !request.getUserPrincipal().getName().equals(username))) {
                 request.logout();
                 request.login(username, password);
             }
-
-
-
             return "books";
         } catch (ServletException ex) {
+
             ResourceBundle bundle = ResourceBundle.getBundle("com.grinyov.library.nls.messages", FacesContext.getCurrentInstance().getViewRoot().getLocale());
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
             FacesContext context = FacesContext.getCurrentInstance();
             FacesMessage message = new FacesMessage(bundle.getString("login_error"));
             message.setSeverity(FacesMessage.SEVERITY_ERROR);
-            context.addMessage("login_form", message);            
+            context.addMessage("formLogin", message);
+
         }
 
         return "index";

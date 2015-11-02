@@ -1,44 +1,52 @@
 package com.grinyov.library.controllers;
 
-import com.grinyov.library.dao.Dao;
-import com.grinyov.library.entity.Author;
+import com.grinyov.library.beans.Pager;
 import com.grinyov.library.comparators.ListComparator;
+import com.grinyov.library.dao.Dao;
+import com.grinyov.library.entity.ext.AuthorExt;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.faces.bean.ApplicationScoped;
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
+import java.io.Serializable;
+import java.util.*;
 
 
-@ManagedBean(eager = false)
-@ApplicationScoped
+@ManagedBean
+@SessionScoped
 public class AuthorController implements Serializable, Converter {
 
-    private List<SelectItem> selectItems = new ArrayList<SelectItem>();;
-    private Map<Long,Author> map;
-    private List<Author> list;
+    private List<SelectItem> selectItems = new ArrayList<SelectItem>();
+    private Map<Long, AuthorExt> map;
+    private List<AuthorExt> list;
+//    private final BookListController bookListController;
+    private Pager pager;
+    private Dao dao;
+    @ManagedProperty(value = "#{bookListController}")
+    private BookListController bookListController;
 
+    @PostConstruct
+    public void init() {
+        pager = bookListController.getPager();
+        dao = bookListController.getDataHelper();
 
-    public AuthorController() {
-        map = new HashMap<Long, Author>();
-        list = Dao.getInstance().getAllAuthors();
+        map = new HashMap<Long, AuthorExt>();
+        list = dao.getAllAuthors();
         Collections.sort(list, ListComparator.getInstance());
-        
-        for (Author author : list) {
+
+        for (AuthorExt author : list) {
             map.put(author.getId(), author);
             selectItems.add(new SelectItem(author, author.getFio()));
         }
     }
-    
-    public List<Author> getAuthorList(){
+
+  
+    public List<AuthorExt> getAuthorList() {
         return list;
     }
 
@@ -53,9 +61,14 @@ public class AuthorController implements Serializable, Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Author)value).getId().toString();
+        return ((AuthorExt) value).getId().toString();
     }
 
-    
+    public BookListController getBookListController() {
+        return bookListController;
+    }
 
+    public void setBookListController(BookListController bookListController) {
+        this.bookListController = bookListController;
+    }
 }

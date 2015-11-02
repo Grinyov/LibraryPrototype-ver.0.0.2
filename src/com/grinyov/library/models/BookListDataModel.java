@@ -2,7 +2,7 @@ package com.grinyov.library.models;
 
 import com.grinyov.library.beans.Pager;
 import com.grinyov.library.dao.Dao;
-import com.grinyov.library.entity.Book;
+import com.grinyov.library.entity.ext.BookExt;
 
 import java.util.List;
 import java.util.Map;
@@ -16,20 +16,22 @@ import org.primefaces.model.SortOrder;
 
 
 
-public class BookListDataModel extends LazyDataModel<Book> {  
+public class BookListDataModel extends LazyDataModel<BookExt> {  
     
-    private List<Book> bookList;
-    private Dao dao = Dao.getInstance();
-    private Pager pager = Pager.getInstance();
+    private List<BookExt> bookList;
+    private Dao dao;
+    private Pager pager;
 
-    public BookListDataModel() {
-        
+    public BookListDataModel(Dao dataHelper, Pager pager) {
+        this.dao = dataHelper;
+        this.pager = pager;
     }
-
+    
+    
     @Override  
-    public Book getRowData(String rowKey) {      
+    public BookExt getRowData(String rowKey) {      
         
-        for(Book book : bookList) {  
+        for(BookExt book : bookList) {  
             if(book.getId().intValue() == Long.valueOf(rowKey).intValue())  
                 return book;  
         }  
@@ -38,12 +40,15 @@ public class BookListDataModel extends LazyDataModel<Book> {
     }  
   
     @Override  
-    public Object getRowKey(Book book) {  
+    public Object getRowKey(BookExt book) {  
         return book.getId();  
     }  
 
-    @Override
-    public List<Book> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String,String> filters) {
+    
+    
+  
+    @Override  
+    public List<BookExt> load(int first, int pageSize, String sortField, SortOrder sortOrder, Map<String,String> filters) {   
         
         pager.setFrom(first);
         pager.setTo(pageSize);
@@ -51,7 +56,6 @@ public class BookListDataModel extends LazyDataModel<Book> {
         dao.populateList();
 
         this.setRowCount(pager.getTotalBooksCount());  
-       
         
         return pager.getList();
         

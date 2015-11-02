@@ -24,14 +24,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import org.hibernate.SessionFactory;
 
 import com.grinyov.library.entity.HibernateUtil;
-import org.hibernate.SessionFactory;
+import com.grinyov.library.beans.Pager;
+import com.grinyov.library.dao.Dao;
+
 
 @WebFilter(filterName = "HibernateSession",
 urlPatterns = {"/pages/*", "/PdfContent"})
 public class HibernateSession implements Filter {
-private SessionFactory sessionFactory;
+
+    private SessionFactory sessionFactory;
     private static final boolean debug = false;
     // The filter configuration object we are associated with.  If
     // this value is null, this filter instance is not currently
@@ -138,9 +142,8 @@ private SessionFactory sessionFactory;
             throws IOException, ServletException {
 
 
-        HibernateSession.RequestWrapper wrappedRequest = new 			 HibernateSession.RequestWrapper((HttpServletRequest) request);
+        HibernateSession.RequestWrapper wrappedRequest = new HibernateSession.RequestWrapper((HttpServletRequest) request);
         HibernateSession.ResponseWrapper wrappedResponse = new HibernateSession.ResponseWrapper((HttpServletResponse) response);
-
 
 
 
@@ -191,6 +194,7 @@ private SessionFactory sessionFactory;
             e.printStackTrace();
             if (sessionFactory.getCurrentSession().getTransaction().isActive()) {
                 sessionFactory.getCurrentSession().getTransaction().rollback();
+                sessionFactory.getCurrentSession().close();
             }
         }
     }

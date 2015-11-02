@@ -3,18 +3,21 @@ package com.grinyov.library.dao;
 import java.util.List;
 
 import com.grinyov.library.beans.Pager;
-import com.grinyov.library.entity.Author;
+import com.grinyov.library.entity.ext.AuthorExt;
 import com.grinyov.library.entity.Book;
-import com.grinyov.library.entity.Genre;
-import com.grinyov.library.entity.Publisher;
+import com.grinyov.library.entity.ext.GenreExt;
+import com.grinyov.library.entity.ext.PublisherExt;
 import com.grinyov.library.entity.HibernateUtil;
+import com.grinyov.library.entity.Vote;
+import com.grinyov.library.entity.ext.BookExt;
 
-import java.util.List;
+
+
+import java.util.HashMap;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.MatchMode;
@@ -33,16 +36,20 @@ import org.hibernate.transform.Transformers;
  */
 public class Dao {
 
-    private Pager pager = Pager.getInstance();
+    
     private SessionFactory sessionFactory = null;
-    private static Dao dataHelper;
+    
     private DetachedCriteria bookListCriteria;
     private DetachedCriteria booksCountCriteria;
     private ProjectionList bookProjection;
+    
+    private Pager pager;
 
-    private Dao() {
+    public Dao(Pager pager) {
+        
+        this.pager = pager;
 
-        prepareCriterias();
+        prepareCriterias();       
 
         sessionFactory = HibernateUtil.getSessionFactory();
 
@@ -57,33 +64,37 @@ public class Dao {
         bookProjection.add(Projections.property("author"), "author");
         bookProjection.add(Projections.property("publishYear"), "publishYear");
         bookProjection.add(Projections.property("descr"), "descr");
+        bookProjection.add(Projections.property("rating"), "rating");
+        bookProjection.add(Projections.property("voteCount"), "voteCount");
+        
+        getAllBooks();
     }
 
-    public static Dao getInstance() {
-        if (dataHelper == null) {
-            dataHelper = new Dao();
-        }
-        return dataHelper;
-    }
+ 
 
     private Session getSession() {
         return sessionFactory.getCurrentSession();
     }
 
-    public List<Genre> getAllGenres() {
-        return getSession().createCriteria(Genre.class).list();
+    public List<GenreExt> getAllGenres() {
+        return getSession().createCriteria(GenreExt.class).list();
     }
 
-    public List<Publisher> getAllPublishers() {
-        return getSession().createCriteria(Publisher.class).list();
+    public List<PublisherExt> getAllPublishers() {
+        return getSession().createCriteria(PublisherExt.class).list();
     }
 
-    public List<Author> getAllAuthors() {
-        return getSession().createCriteria(Author.class).list();
+    public List<AuthorExt> getAllAuthors() {
+        return getSession().createCriteria(AuthorExt.class).list();
     }
 
-    public Author getAuthor(long id) {
-        return (Author) getSession().get(Author.class, id);
+    public AuthorExt getAuthor(long id) {
+        return (AuthorExt) getSession().get(AuthorExt.class, id);
+    }
+    
+    public void getBooksByRate() {
+        prepareOrderedCriterias("rating");
+        populateList();
     }
 
     public void getAllBooks() {
@@ -132,11 +143,11 @@ public class Dao {
 
     private void runBookListCriteria() {
         Criteria criteria = bookListCriteria.getExecutableCriteria(getSession());
-        criteria.addOrder(Order.asc("b.name")).setProjection(bookProjection).setResultTransformer(Transformers.aliasToBean(Book.class));
+        criteria.addOrder(Order.asc("b.name")).setProjection(bookProjection).setResultTransformer(Transformers.aliasToBean(BookExt.class));
 
         criteria.setFirstResult(pager.getFrom()).setMaxResults(pager.getTo());
 
-        List<Book> list = criteria.list();
+        List<BookExt> list = criteria.list();
         pager.setList(list);
     }
 
@@ -146,17 +157,33 @@ public class Dao {
         pager.setTotalBooksCount(total);
     }
 
-    public void updateBook(Book book) {
-        Query query = getSession().createQuery("update Book set name = :name, "
-                + " pageCount = :pageCount, "
-                + " isbn = :isbn, "
-                + " genre = :genre, "
-                + " author = :author, "
-                + " publishYear = :publishYear, "
-                + " publisher = :publisher, "
-                + " descr = :descr "
-                + " where id = :id");
-        
+    public void updateBook(BookExt book) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("update Book ");
+        queryBuilder.append("set name = :name, ");
+        queryBuilder.append("pageCount = :pageCount, ");
+        queryBuilder.append("isbn = :isbn, ");
+        queryBuilder.append("genre = :genre, ");
+        queryBuilder.append("author = :author, ");
+        queryBuilder.append("publishYear = :publishYear, ");
+        queryBuilder.append("publisher = :publisher, ");
+
+        if (book.isImageEdited()) {
+            queryBuilder.append("image = :image, ");
+        }
+
+        if (book.isContentEdited()) {
+            queryBuilder.append("content = :content, ");
+        }
+
+        queryBuilder.append("descr = :descr ");
+
+        queryBuilder.append("where id = :id");
+
+
+        Query query = getSession().createQuery(queryBuilder.toString());
+
+
         query.setParameter("name", book.getName());
         query.setParameter("pageCount", book.getPageCount());
         query.setParameter("isbn", book.getIsbn());
@@ -167,8 +194,55 @@ public class Dao {
         query.setParameter("descr", book.getDescr());
         query.setParameter("id", book.getId());
 
+        if (book.isImageEdited()) {
+            query.setParameter("image", book.getImage());
+        }
+
+        if (book.isContentEdited()) {
+            query.setParameter("content", book.getContent());
+        }
+
+
         int result = query.executeUpdate();
-        
+
+
+    }
+    
+
+    public void rateBook(Book book, String username) {
+        Vote vote = new Vote();
+        vote.setBook(book);
+        vote.setUsername(username);
+        vote.setValue(book.getRating());
+        getSession().save(vote);
+
+        updateBookRate(book);
+
+
+    }
+
+    private void updateBookRate(Book book) {
+
+
+        Query query = getSession().createQuery("select new map(round(avg(value)) as rating, count(value) as voteCount)  from Vote v where v.book.id=:id");
+        query.setParameter("id", book.getId());
+
+        List list = query.list();
+
+        HashMap<String, Object> map = (HashMap<String, Object>) list.get(0);
+
+        long voteCount = Long.valueOf(map.get("voteCount").toString());
+        int rating = Long.valueOf(map.get("rating").toString()).intValue();
+
+        query = getSession().createQuery("update Book set rating = :rating, "
+                + " voteCount = :voteCount"
+                + " where id = :id");
+
+        query.setParameter("rating", rating);
+        query.setParameter("voteCount", voteCount);
+        query.setParameter("id", book.getId());
+
+        int result = query.executeUpdate();
 
     }
 
@@ -190,6 +264,15 @@ public class Dao {
 
     private void prepareCriterias() {
         bookListCriteria = DetachedCriteria.forClass(Book.class, "b");
+        createAliases(bookListCriteria);
+
+        booksCountCriteria = DetachedCriteria.forClass(Book.class, "b");
+        createAliases(booksCountCriteria);
+    }
+    
+     private void prepareOrderedCriterias(String field) {
+        bookListCriteria = DetachedCriteria.forClass(Book.class, "b");
+        bookListCriteria.addOrder(Order.desc("b."+field));
         createAliases(bookListCriteria);
 
         booksCountCriteria = DetachedCriteria.forClass(Book.class, "b");

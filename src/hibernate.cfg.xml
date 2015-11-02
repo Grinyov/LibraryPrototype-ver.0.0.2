@@ -16,6 +16,6 @@
     <mapping resource="com/grinyov/library/entity/Author.hbm.xml"/>
     <mapping resource="com/grinyov/library/entity/Book.hbm.xml"/>
     <mapping resource="com/grinyov/library/entity/Publisher.hbm.xml"/>
-  
+    <mapping resource="com/grinyov/library/entity/Vote.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

@@ -1,10 +1,12 @@
 package com.grinyov.library.servlets;
 
-import com.grinyov.library.dao.Dao;
+import com.grinyov.library.controllers.BookListController;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+//import javax.el.ELContext;
+//import javax.faces.context.FacesContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -18,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  */
 @WebServlet(name = "PdfContent",
-        urlPatterns = {"/PdfContent"})
+urlPatterns = {"/PdfContent"})
 public class PdfContent extends HttpServlet {
 
     /**
@@ -40,10 +42,12 @@ public class PdfContent extends HttpServlet {
             Boolean save = Boolean.valueOf(request.getParameter("save"));
             String filename = request.getParameter("filename");
 
-            byte[] content = Dao.getInstance().getContent(id);
+            BookListController bookListController = (BookListController) request.getSession().getAttribute("bookListController");
+
+            byte[] content = bookListController.getDataHelper().getContent(id);
             response.setContentLength(content.length);
             if (save) {
-                response.setHeader("Content-Disposition", "attachment;filename="+ URLEncoder.encode(filename,"UTF-8")+".pdf");
+                response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, "UTF-8") + ".pdf");
             }
             out.write(content);
         } catch (Exception ex) {

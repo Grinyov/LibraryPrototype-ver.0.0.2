@@ -1,28 +1,22 @@
 package com.grinyov.library.beans;
 
-import com.grinyov.library.entity.Book;
+
+import com.grinyov.library.entity.ext.BookExt;
+
+import javax.faces.bean.SessionScoped;
 import java.util.List;
 
+@SessionScoped
 public class Pager {
 
     private static Pager pager;
-    
-    private int rowIndex;
 
-    private Pager() {
+    public Pager() {
     }
-
-    public static Pager getInstance() {
-        if (pager == null) {
-            pager = new Pager();
-        }
-        return pager;
-    }
-    
     
     private int totalBooksCount;
-    private Book selectedBook;
-    private List<Book> list;
+    private BookExt selectedBook;
+    private List<BookExt> list;
     private int from;
     private int to;
 
@@ -42,12 +36,11 @@ public class Pager {
         this.to = to;
     }
 
-    public List<Book> getList() {
+    public List<BookExt> getList() {
         return list;
     }
 
-    public void setList(List<Book> list) {
-        rowIndex = -1;
+    public void setList(List<BookExt> list) {
         this.list = list;
     }
 
@@ -59,22 +52,13 @@ public class Pager {
         return totalBooksCount;
     }
 
-    public Book getSelectedBook() {
+    public BookExt getSelectedBook() {
         return selectedBook;
     }
 
-    public void setSelectedBook(Book selectedBook) {
+    public void setSelectedBook(BookExt selectedBook) {
         this.selectedBook = selectedBook;
     }
 
-    public int getRowIndex() {
-        rowIndex+=1;
-        return rowIndex;
-    }
 
-    public void setRowIndex(int rowIndex) {
-        this.rowIndex = rowIndex;
-    }
-    
-    
 }

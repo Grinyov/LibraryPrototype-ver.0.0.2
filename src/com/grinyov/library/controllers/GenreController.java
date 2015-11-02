@@ -1,8 +1,9 @@
 package com.grinyov.library.controllers;
 
 import com.grinyov.library.dao.Dao;
-import com.grinyov.library.entity.Genre;
+import com.grinyov.library.entity.ext.GenreExt;
 import com.grinyov.library.comparators.ListComparator;
+import com.grinyov.library.beans.Pager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,29 +11,39 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.faces.bean.ApplicationScoped;
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
 
 
-@ManagedBean(eager = false)
-@ApplicationScoped
+@ManagedBean
+@SessionScoped
 public class GenreController implements Serializable, Converter {
 
     private List<SelectItem> selectItems = new ArrayList<SelectItem>();
-    private Map<Long, Genre> map;
-    private List<Genre> list;
+    private Map<Long, GenreExt> map;
+    private List<GenreExt> list;
+    private Pager pager;
+    private Dao dao;
+    @ManagedProperty(value = "#{bookListController}")
+    private BookListController bookListController;
 
-    public GenreController() {
 
-        map = new HashMap<Long, Genre>();
-        list = Dao.getInstance().getAllGenres();
+    @PostConstruct
+    public void init() {
+        pager = bookListController.getPager();
+        dao = bookListController.getDataHelper();
+
+        map = new HashMap<Long, GenreExt>();
+        list = dao.getAllGenres();
         Collections.sort(list, ListComparator.getInstance());
 
-        for (Genre genre : list) {
+        for (GenreExt genre : list) {
             map.put(genre.getId(), genre);
             selectItems.add(new SelectItem(genre, genre.getName()));
         }
@@ -43,7 +54,7 @@ public class GenreController implements Serializable, Converter {
         return selectItems;
     }
 
-    public List<Genre> getGenreList() {
+    public List<GenreExt> getGenreList() {
         return list;
     }
 
@@ -54,7 +65,15 @@ public class GenreController implements Serializable, Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Genre)value).getId().toString();
+        return ((GenreExt) value).getId().toString();
+    }
+
+    public BookListController getBookListController() {
+        return bookListController;
+    }
+
+    public void setBookListController(BookListController bookListController) {
+        this.bookListController = bookListController;
     }
     
     

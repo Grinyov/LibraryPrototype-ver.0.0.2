@@ -31,5 +31,18 @@
     <orderEntry type="library" name="mysql-connector-java-5.1.36-bin" level="project" />
     <orderEntry type="library" name="primefaces-5.3" level="project" />
     <orderEntry type="library" name="primefaces-4.0" level="project" />
+    <orderEntry type="library" name="Java EE 6-Java EE 6" level="project" />
+    <orderEntry type="library" name="primefaces-4.0 (2)" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/myfaces-api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="javax.faces-2.2.0 (2)" level="project" />
+    <orderEntry type="library" name="primefaces-3.5" level="project" />
   </component>
 </module>

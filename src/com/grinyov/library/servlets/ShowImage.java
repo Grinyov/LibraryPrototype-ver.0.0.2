@@ -1,8 +1,8 @@
 package com.grinyov.library.servlets;
 
 import com.grinyov.library.controllers.BookListController;
-import com.grinyov.library.entity.Book;
-//import com.grinyov.library.servlets;
+import com.grinyov.library.entity.ext.BookExt;
+
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,7 +38,7 @@ public class ShowImage extends HttpServlet {
         try {
             int index = Integer.valueOf(request.getParameter("index"));
             BookListController bookListController = (BookListController) request.getSession(false).getAttribute("bookListController");
-            byte[] image = ((Book)bookListController.getPager().getList().get(index)).getImage();
+            byte[] image = ((BookExt)bookListController.getPager().getList().get(index)).getImage();
             response.setContentLength(image.length);
             out.write(image);
         } catch (Exception ex) {

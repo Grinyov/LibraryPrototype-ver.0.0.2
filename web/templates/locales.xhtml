@@ -4,32 +4,40 @@
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:fn="http://java.sun.com/jsp/jstl/functions">
-    <h:head>
-        <title>Facelet Title</title>
-        <h:outputStylesheet library="css" name="style_main.css"  />
-    </h:head>
-    <h:body>
-        <ui:composition>
+      xmlns:p="http://primefaces.org/ui" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://java.sun.com/jsf/html
+http://java.sun.com/jsf/html ">
+<h:head>
+    <title>Facelet Title</title>
+</h:head>
+<h:body>
+    <ui:composition>
 
-            <div class="locales">
-                <h:form>
 
-                    <h:commandLink action="#{localeChanger.changeLocale('en')}">
-                        <h:graphicImage library="images" name="eng.png" title="#{msg.english}" />
-                        <f:ajax render=":login_div :lib_title" execute="@form" disabled="#{fn:contains(request.requestURL, 'books.xhtml')}"/>
-                        <f:ajax render="@all" execute="@form" disabled="#{not fn:contains(request.requestURL, 'books.xhtml')}"/>
-                    </h:commandLink>
-                    <h:commandLink action = "#{localeChanger.changeLocale('ru')}">
-                        <h:graphicImage library="images" name="rus.png" title="#{msg.russian}"/>
-                        <f:ajax render=":login_div :lib_title" execute="@form" disabled="#{fn:contains(request.requestURL, 'books.xhtml')}"/>
-                        <f:ajax render="@all" execute="@form" disabled="#{not fn:contains(request.requestURL, 'books.xhtml')}"/>
-                    </h:commandLink>
+        <div class="lang">
 
-                </h:form>
-            </div>
 
-        </ui:composition>
-    </h:body>
+            <h:form style="display: inline;">
+
+                <h:commandLink actionListener="#{localeChanger.changeLocale('ru')}">
+                    <h:graphicImage styleClass="#{localeChanger.currentLocale == 'ru' ? 'active':''}" library="images"
+                                    name="rus.png" title="#{msg.russian}" width="16" height="13"/>
+                </h:commandLink>
+
+
+                <h:commandLink actionListener="#{localeChanger.changeLocale('en')}">
+                    <h:graphicImage styleClass="#{localeChanger.currentLocale == 'en' ? 'active':''}" library="images"
+                                    name="usa.png" title="#{msg.english}" width="16" height="13"/>
+                </h:commandLink>
+
+
+            </h:form>
+
+
+        </div>
+
+
+    </ui:composition>
+</h:body>
 </html>
 

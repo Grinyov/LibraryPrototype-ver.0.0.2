@@ -3,6 +3,9 @@ package com.grinyov.library.controllers;
 import com.grinyov.library.comparators.ListComparator;
 import com.grinyov.library.dao.Dao;
 import com.grinyov.library.entity.Publisher;
+import com.grinyov.library.entity.ext.PublisherExt;
+import com.grinyov.library.entity.ext.GenreExt;
+import com.grinyov.library.beans.Pager;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,30 +13,40 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.SessionScoped;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.model.SelectItem;
 
 
-@ManagedBean(eager = false)
-@ApplicationScoped
+@ManagedBean
+@SessionScoped
 public class PublisherController implements Serializable, Converter {
 
     private List<SelectItem> selectItems = new ArrayList<SelectItem>();
-    private Map<Long, Publisher> map;
-    private List<Publisher> list;
+    private Map<Long, PublisherExt> map;
+    private List<PublisherExt> list;
+    private Pager pager;
+    private Dao dao;
+    @ManagedProperty(value = "#{bookListController}")
+    private BookListController bookListController;
 
-    public PublisherController() {
+    @PostConstruct
+    public void init() {
+        pager = bookListController.getPager();
+        dao = bookListController.getDataHelper();
 
-        map = new HashMap<Long, Publisher>();
-        list = Dao.getInstance().getAllPublishers();
-        
+        map = new HashMap<Long, PublisherExt>();
+        list = dao.getAllPublishers();
+
         Collections.sort(list, ListComparator.getInstance());
 
-        for (Publisher publisher : list) {
+        for (PublisherExt publisher : list) {
             map.put(publisher.getId(), publisher);
             selectItems.add(new SelectItem(publisher, publisher.getName()));
         }
@@ -44,7 +57,7 @@ public class PublisherController implements Serializable, Converter {
         return selectItems;
     }
 
-    public List<Publisher> getPublisherList() {
+    public List<PublisherExt> getPublisherList() {
         return list;
     }
 
@@ -55,6 +68,14 @@ public class PublisherController implements Serializable, Converter {
 
     @Override
     public String getAsString(FacesContext context, UIComponent component, Object value) {
-        return ((Publisher)value).getId().toString();
+        return ((PublisherExt) value).getId().toString();
+    }
+
+    public BookListController getBookListController() {
+        return bookListController;
+    }
+
+    public void setBookListController(BookListController bookListController) {
+        this.bookListController = bookListController;
     }
 }

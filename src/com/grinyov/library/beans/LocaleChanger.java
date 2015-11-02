@@ -16,7 +16,7 @@ import javax.faces.context.FacesContext;
 @SessionScoped
 public class LocaleChanger implements Serializable {
 
-    private static Locale currentLocale = FacesContext.getCurrentInstance().getViewRoot().getLocale();
+    private Locale currentLocale = new Locale("ru");
 
     public LocaleChanger() {
     }
@@ -28,6 +28,7 @@ public class LocaleChanger implements Serializable {
     public Locale getCurrentLocale() {
         return currentLocale;
     }
+
 
 
 }

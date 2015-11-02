@@ -7,8 +7,7 @@ import java.util.Set;
  * 
  */
 public class Publisher  implements java.io.Serializable {
-
-
+   
     private Long id;
     private String name;
     private Set books = new HashSet(0);
@@ -47,33 +46,6 @@ public class Publisher  implements java.io.Serializable {
 
     public void setBooks(Set books) {
         this.books = books;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 41 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Publisher other = (Publisher) obj;
-        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return name;
     }
 
 }
